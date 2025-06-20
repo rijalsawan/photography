@@ -1,54 +1,190 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-
+import { motion } from 'framer-motion'
+import { Home, Search, PlusSquare, Heart, User, Camera } from 'lucide-react'
+import {
+    SignInButton,
+    ClerkProvider,
+    SignedIn,
+    SignedOut,
+    UserButton,
+} from '@clerk/nextjs'
 
 const Navbar = () => {
-    const [scrolled, setScrolled] = useState(false)
-
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 50)
-        }
-        window.addEventListener('scroll', handleScroll)
-        return () => window.removeEventListener('scroll', handleScroll)
-    }, [])
-
-    const navItems = [
-        { name: 'About', href: '#' },
-        { name: 'Contact', href: '#' }
-    ]
+    const [activeTab, setActiveTab] = useState('home')
 
     return (
-        <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ease-in-out ${
-            scrolled ? 'bg-white/90 backdrop-blur-md shadow-sm' : 'bg-transparent'
-        }`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-16">
-                    {/* Logo */}
-                    <Link href="/" className="text-xl font-bold text-gray-900 hover:text-gray-700 transition-colors">
-                        Sawan Rijal
+        <ClerkProvider>
+            {/* Top Brand Bar - Desktop Only */}
+            <motion.div
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.6 }}
+                className="hidden sm:block fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100"
+            >
+                <div className="max-w-6xl mx-auto px-6 py-4">
+                    <Link href="/" className="flex items-center space-x-2">
+                        <Camera className="w-6 h-6 text-gray-900" />
+                        <span className="text-xl font-bold text-gray-900">PhotoShare</span>
                     </Link>
-
-                    {/* Desktop Menu */}
-                    <div className="hidden md:flex space-x-8">
-                        {navItems.map((item) => (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 relative group"
-                            >
-                                {item.name}
-                                <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gray-900 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"></span>
-                            </Link>
-                        ))}
-                    </div>
-
-                    
                 </div>
-            </div>
-        </nav>
+            </motion.div>
+
+            {/* Bottom Navigation - Mobile */}
+            <motion.nav
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="max-sm:fixed lg:hidden max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:z-50 max-sm:bg-white max-sm:border-t max-sm:border-gray-100"
+            >
+                <div className="max-sm:px-4 max-sm:py-2">
+                    <div className="max-sm:flex max-sm:justify-around max-sm:items-center">
+                        <NavItem 
+                            icon={Home} 
+                            href="/" 
+                            isActive={activeTab === 'home'}
+                            onClick={() => setActiveTab('home')}
+                        />
+                        <NavItem 
+                            icon={Search} 
+                            href="/search" 
+                            isActive={activeTab === 'search'}
+                            onClick={() => setActiveTab('search')}
+                        />
+                        <NavItem 
+                            icon={PlusSquare} 
+                            href="/addphoto" 
+                            isActive={activeTab === 'addphoto'}
+                            onClick={() => setActiveTab('addphoto')}
+                        />
+                        
+                        <SignedOut>
+                            <div className="flex items-center space-x-2">
+                                <motion.div
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="px-4 py-2 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors"
+                                >
+                                    <SignInButton />
+                                </motion.div>
+                            </div>
+                        </SignedOut>
+                        <SignedIn>
+                            {/* icon of a profile */}
+                            <div className="flex items-center space-x-2">
+                            <NavItem
+                                icon={User} 
+                                href="/profile" 
+                                isActive={activeTab === 'profile'}
+                                onClick={() => setActiveTab('profile')}
+                                isDesktop
+                            />
+                            </div>
+                        </SignedIn>
+                    </div>
+                </div>
+            </motion.nav>
+
+            {/* Bottom Navigation - Desktop */}
+            <motion.nav
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="hidden sm:block fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50"
+            >
+                <div className="bg-white/80 backdrop-blur-xl rounded-full border border-gray-200 shadow-lg px-6 py-3">
+                    <div className="flex items-center space-x-8">
+                        <NavItem 
+                            icon={Home} 
+                            href="/" 
+                            isActive={activeTab === 'home'}
+                            onClick={() => setActiveTab('home')}
+                            isDesktop
+                        />
+                        <NavItem 
+                            icon={Search} 
+                            href="/search" 
+                            isActive={activeTab === 'search'}
+                            onClick={() => setActiveTab('search')}
+                            isDesktop
+                        />
+                        <NavItem 
+                            icon={PlusSquare} 
+                            href="/addphoto" 
+                            isActive={activeTab === 'addphoto'}
+                            onClick={() => setActiveTab('addphoto')}
+                            isDesktop
+                        />
+                        
+                        <SignedOut>
+                            <div className="flex items-center space-x-2">
+                                <motion.div
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="px-4 py-2 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors"
+                                >
+                                    <SignInButton />
+                                </motion.div>
+                            </div>
+                        </SignedOut>
+                        <SignedIn>
+                            {/* icon of a profile */}
+                            <div className="flex items-center space-x-2">
+                            <NavItem
+                                icon={User} 
+                                href="/profile" 
+                                isActive={activeTab === 'profile'}
+                                onClick={() => setActiveTab('profile')}
+                                isDesktop
+                            />
+                            </div>
+                        </SignedIn>
+                    </div>
+                </div>
+            </motion.nav>
+        </ClerkProvider>
     )
 }
+
+// Navigation Item Component
+const NavItem = ({ 
+    icon: Icon, 
+    href, 
+    isActive, 
+    onClick, 
+    isDesktop = false 
+}: { 
+    icon: any; 
+    href: string; 
+    isActive: boolean; 
+    onClick: () => void;
+    isDesktop?: boolean;
+}) => (
+    <motion.div
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ duration: 0.2 }}
+    >
+        <Link
+            href={href}
+            onClick={onClick}
+            className={`flex items-center justify-center p-3 transition-all duration-200 ${
+                isDesktop ? 'rounded-full' : 'rounded-lg'
+            } ${
+                isActive 
+                    ? 'text-gray-900' 
+                    : 'text-gray-400 hover:text-gray-600'
+            }`}
+        >
+            <Icon 
+                className={`w-6 h-6 ${
+                    isActive ? 'fill-current' : ''
+                }`} 
+                strokeWidth={isActive ? 2 : 1.5}
+            />
+        </Link>
+    </motion.div>
+)
 
 export default Navbar
