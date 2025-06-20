@@ -25,6 +25,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PhotoShare - Share Your Moments",
   description: "A modern photography social platform",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  }
 };
 
 export default function RootLayout({
@@ -35,6 +40,9 @@ export default function RootLayout({
   return (
     <ClerkProvider>
     <html lang="en">
+    <head>
+      <link rel="icon" href="/favicon.svg" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
