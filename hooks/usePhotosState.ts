@@ -25,6 +25,7 @@ interface Comment {
     }
     createdAt: string
     replies?: Comment[]
+    replyCount?: number
 }
 
 export function usePhotosState(initialPhotos: Photo[] = []) {
@@ -96,13 +97,26 @@ export function usePhotosState(initialPhotos: Photo[] = []) {
     }, [])
 
     // Add a reply to a comment
-    const addReply = useCallback((commentId: string, reply: Comment) => {
-        setComments(prev => prev.map(comment => 
-            comment.id === commentId 
-                ? { ...comment, replies: [...(comment.replies || []), reply] }
-                : comment
-        ))
-    }, [])
+    const addReply = (commentId: string, reply: any) => {
+    console.log('Adding reply to state:', { commentId, reply }) // Debug log
+    
+    setComments(prev => {
+        const updated = prev.map(comment => {
+            if (comment.id === commentId) {
+                const updatedComment = { 
+                    ...comment, 
+                    replies: [...(comment.replies || []), reply],
+                    replyCount: (comment.replyCount || 0) + 1
+                }
+                console.log('Updated comment with new reply:', updatedComment) // Debug log
+                return updatedComment
+            }
+            return comment
+        })
+        console.log('Updated comments array:', updated) // Debug log
+        return updated
+    })
+}
 
     // Remove a comment
     const removeComment = useCallback((commentId: string) => {

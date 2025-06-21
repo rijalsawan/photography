@@ -22,22 +22,52 @@ const useComments = (photoId: string) => {
         return response.json();
     };
 
-    const postComment = async (photoId: string, content: string): Promise<Comment> => {
+    const postComment = async (photoId: string, text: string) => {
+    try {
+        setLoading(true)
+        
+        console.log('Adding comment:', { photoId, text }) // Debug log
+        
         const response = await fetch('/api/comments', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                photoId,
-                content,
-            }),
-        });
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ photoId, text })
+        })
+        
+        console.log('Response status:', response.status) // Debug log
+        console.log('Response ok:', response.ok) // Debug log
+        
+        // Get response text first to see what we're getting
+        const responseText = await response.text()
+        console.log('Raw response:', responseText) // Debug log
+        
         if (!response.ok) {
-            throw new Error('Failed to post comment');
+            throw new Error(`HTTP error! status: ${response.status}, response: ${responseText}`)
         }
-        return response.json();
-    };
+        
+        // Try to parse JSON
+        let result
+        try {
+            result = JSON.parse(responseText)
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError)
+            throw new Error(`Invalid JSON response: ${responseText}`)
+        }
+        
+        console.log('Comment API response:', result) // Debug log
+        
+        if (result.success) {
+            return result
+        } else {
+            return { success: false, error: result.error }
+        }
+    } catch (error) {
+        console.error('Error adding comment:', error)
+        return { success: false, error: error }
+    } finally {
+        setLoading(false)
+    }
+}
 
     useEffect(() => {
         const loadComments = async () => {

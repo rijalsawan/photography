@@ -227,27 +227,40 @@ export default function ProfilePage() {
     }
 
     const handleReply = async (e: React.FormEvent, commentId: string) => {
-        e.preventDefault()
-        if (!replyText.trim()) return
-        
-        const result = await addReplyAPI(commentId, replyText)
-        if (result?.success) {
-            addReplyToState(commentId, result.reply)
-            updatePhotoCommentCount(selectedPhoto!.id, 1)
-            cancelReply()
-        }
+    e.preventDefault()
+    if (!replyText.trim()) return
+    
+    console.log('Handling reply:', { commentId, replyText }) // Debug log
+    
+    const result = await addReplyAPI(commentId, replyText)
+    
+    console.log('Reply result:', result) // Debug log
+    
+    if (result) {
+        console.log('Reply successful, updating state') // Debug log
+        addReplyToState(commentId, result.reply)
+        updatePhotoCommentCount(selectedPhoto!.id, 1)
+        cancelReply()
+        toast.success('Reply added successfully!')
+    } else {
+        console.error('Reply failed:', result)
+        // Don't show error toast here since it's already shown in addReplyAPI
+        // toast.error(result?.error || 'Failed to add reply')
     }
+}
 
     const handleDeleteComment = async (commentId: string) => {
-        setDeletingComment(commentId)
-        const result = await deleteCommentAPI(commentId)
-        if (result?.success) {
-            removeComment(commentId)
-            updatePhotoCommentCount(selectedPhoto!.id, -result.deletedCount)
-            setShowDeleteConfirm(null)
-        }
-        setDeletingComment(null)
+    setDeletingComment(commentId)
+    const result = await deleteCommentAPI(commentId)
+    if (result?.success) {
+        // Use the returned deletedCount from the API
+        const deletedCount = result.deletedCount || 1
+        removeComment(commentId)
+        updatePhotoCommentCount(selectedPhoto!.id, -deletedCount)
+        setShowDeleteConfirm(null)
     }
+    setDeletingComment(null)
+}
 
     // Follow/Unfollow functionality
     const handleFollowInModal = async (userId: string, currentlyFollowing: boolean) => {

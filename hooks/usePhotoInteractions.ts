@@ -1,194 +1,236 @@
-'use client'
-import { useState, useCallback } from 'react'
-import { useUser } from '@clerk/nextjs'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
 
-interface Photo {
-    id: string
-    url: string
-    title?: string
-    description?: string
-    likeCount: number
-    commentCount: number
-    createdAt: string
-    isLiked?: boolean
-    userId: string
-}
-
-interface Comment {
-    id: string
-    text: string
-    user: {
-        id: string
-        name: string
-        username: string
-        avatar?: string
-    }
-    createdAt: string
-    replies?: Comment[]
-}
-
-export function usePhotoInteractions() {
-    const { user } = useUser()
+export const usePhotoInteractions = () => {
     const [loading, setLoading] = useState(false)
 
-    // Like/Unlike a photo
-    const toggleLike = useCallback(async (photoId: string) => {
-        if (!user || loading) return null
-        
-        setLoading(true)
+    const toggleLike = async (photoId: string) => {
         try {
+            setLoading(true)
             const response = await fetch('/api/like', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ photoId }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ photoId })
             })
             
-            if (response.ok) {
-                const result = await response.json()
-                toast.success(result.message)
-                return {
-                    success: true,
-                    liked: result.liked,
-                    photoId
-                }
+            // Check if response is ok before parsing JSON
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`)
             }
-            throw new Error('Failed to like photo')
+            
+            const result = await response.json()
+            
+            if (result.success) {
+                if (result.liked) {
+                    toast.success('Photo liked!')
+                } else {
+                    toast.success('Photo unliked!')
+                    // Optionally show notification deletion feedback
+                    if (result.notificationsDeleted) {
+                        console.log('Like notifications cleaned up')
+                    }
+                }
+            } else {
+                toast.error(result.error || 'Failed to toggle like')
+            }
+            
+            return result
         } catch (error) {
-            console.error('Error liking photo:', error)
-            toast.error('Failed to like photo')
-            return null
+            console.error('Error toggling like:', error)
+            toast.error('Failed to toggle like')
+            return { success: false }
         } finally {
             setLoading(false)
         }
-    }, [user, loading])
+    }
 
-    // Add a comment
-    const addComment = useCallback(async (photoId: string, text: string) => {
-        if (!user || loading || !text.trim()) return null
-        
-        setLoading(true)
+    const addComment = async (photoId: string, text: string) => {
         try {
+            setLoading(true)
+            
+            console.log('Adding comment:', { photoId, text }) // Debug log
+            
             const response = await fetch('/api/comments', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    photoId,
-                    text: text.trim(),
-                }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ photoId, text })
             })
             
-            if (response.ok) {
-                const result = await response.json()
-                toast.success('Comment added!')
-                return {
-                    success: true,
-                    comment: result,
-                    photoId
-                }
+            // Check if response is ok before parsing JSON
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`)
             }
-            throw new Error('Failed to add comment')
+            
+            const result = await response.json()
+            
+            console.log('Comment API response:', result) // Debug log
+            
+            if (result.success) {
+                toast.success('Comment added!')
+                return result
+            } else {
+                toast.error(result.error || 'Failed to add comment')
+                return { success: false, error: result.error }
+            }
         } catch (error) {
             console.error('Error adding comment:', error)
             toast.error('Failed to add comment')
-            return null
+            return { success: false, error: 'Network error' }
         } finally {
             setLoading(false)
         }
-    }, [user, loading])
+    }
 
-    // Add a reply
-    const addReply = useCallback(async (commentId: string, text: string) => {
-        if (!user || loading || !text.trim()) return null
-        
+    const addReply = async (commentId: string, text: string) => {
+    try {
         setLoading(true)
-        try {
-            const response = await fetch('/api/reply', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    commentId,
-                    text: text.trim(),
-                }),
-            })
-            
-            if (response.ok) {
-                const result = await response.json()
-                toast.success('Reply added!')
-                return {
-                    success: true,
-                    reply: result,
-                    commentId
-                }
-            }
-            throw new Error('Failed to add reply')
-        } catch (error) {
-            console.error('Error adding reply:', error)
-            toast.error('Failed to add reply')
-            return null
-        } finally {
-            setLoading(false)
+        
+        console.log('Adding reply:', { commentId, text }) // Debug log
+        
+        const response = await fetch('/api/reply', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ commentId, text })
+        })
+        
+        console.log('Reply response status:', response.status) // Debug log
+        
+        // Check if response is ok before parsing JSON
+        if (!response.ok) {
+            const errorText = await response.text()
+            console.error('Reply API error:', errorText)
+            throw new Error(`HTTP error! status: ${response.status}, response: ${errorText}`)
         }
-    }, [user, loading])
-
-    // Delete a comment
-    const deleteComment = useCallback(async (commentId: string) => {
-        if (!user || loading) return null
         
-        setLoading(true)
+        // Get response text first to check if it's empty
+        const responseText = await response.text()
+        console.log('Reply raw response:', responseText) // Debug log
+        
+        if (!responseText) {
+            throw new Error('Empty response received')
+        }
+
+        // Try to parse JSON
+        let result
         try {
-            const response = await fetch(`/api/deletecomment?commentId=${commentId}`, {
+            result = JSON.parse(responseText)
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError)
+            throw new Error(`Invalid JSON response: ${responseText}`)
+        }
+        
+        console.log('Reply API response:', result) // Debug log
+        
+        if (result) {
+            toast.success('Reply added!')
+            return result
+        } else {
+            const errorMessage = result?.error || 'Failed to add reply'
+            console.error('Reply failed:', errorMessage)
+            toast.error(errorMessage)
+            return { success: false, error: errorMessage }
+        }
+    } catch (error) {
+        console.error('Error adding reply:', error)
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        toast.error('Failed to add reply: ' + errorMessage)
+        return { success: false, error: errorMessage }
+    } finally {
+        setLoading(false)
+    }
+}
+
+    const deleteComment = async (commentId: string) => {
+        try {
+            setLoading(true)
+            const response = await fetch(`/api/deletecomment`, {
                 method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ commentId })
             })
             
-            if (response.ok) {
-                const result = await response.json()
+            // Check if response is ok before parsing JSON
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
+            
+            const result = await response.json()
+            
+            if (result.success) {
                 toast.success('Comment deleted!')
-                return {
-                    success: true,
-                    deletedCount: result.deletedCount || 1,
-                    commentId
+                // Show notification cleanup feedback
+                if (result.notificationsDeleted) {
+                    console.log('Comment notifications cleaned up')
                 }
             } else {
-                const errorData = await response.json()
-                throw new Error(errorData.error || 'Failed to delete comment')
+                toast.error(result.error || 'Failed to delete comment')
             }
+            
+            return result
         } catch (error) {
             console.error('Error deleting comment:', error)
             toast.error('Failed to delete comment')
-            return null
+            return { success: false }
         } finally {
             setLoading(false)
         }
-    }, [user, loading])
+    }
 
-    // Fetch comments for a photo
-    const fetchComments = useCallback(async (photoId: string) => {
+    const fetchComments = async (photoId: string) => {
         try {
+            console.log('Fetching comments for photo:', photoId) // Debug log
+            
             const response = await fetch(`/api/comments?photoId=${photoId}`)
-            if (response.ok) {
-                return await response.json()
+            
+            // Check if response is ok
+            if (!response.ok) {
+                console.error(`HTTP error! status: ${response.status}`)
+                return []
             }
-            throw new Error('Failed to fetch comments')
+
+            // Check if response has content
+            const contentType = response.headers.get('content-type')
+            if (!contentType || !contentType.includes('application/json')) {
+                console.error('Response is not JSON:', contentType)
+                return []
+            }
+
+            // Get response text first to check if it's empty
+            const responseText = await response.text()
+            
+            if (!responseText) {
+                console.error('Empty response received')
+                return []
+            }
+
+            // Try to parse JSON
+            let result
+            try {
+                result = JSON.parse(responseText)
+            } catch (parseError) {
+                console.error('JSON parse error:', parseError)
+                console.error('Response text:', responseText)
+                return []
+            }
+            
+            console.log('Fetch comments response:', result) // Debug log
+            
+            if (result && result.success) {
+                return result.comments || []
+            } else {
+                console.error('Failed to fetch comments:', result?.error || 'Unknown error')
+                return []
+            }
         } catch (error) {
             console.error('Error fetching comments:', error)
-            toast.error('Failed to load comments')
             return []
         }
-    }, [])
+    }
 
-    // Check if user can delete a comment
-    const canDeleteComment = useCallback((comment: Comment, photoUserId?: string) => {
-        if (!user) return false
-        // User can delete their own comments or comments on their photos
-        return comment.user.id === user.id || photoUserId === user.id
-    }, [user])
+    const canDeleteComment = (comment: any, photoOwnerId?: string) => {
+        // Add your logic here
+        return true
+    }
 
     return {
         toggleLike,

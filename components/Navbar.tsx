@@ -11,6 +11,8 @@ import {
     UserButton,
 } from '@clerk/nextjs'
 
+import NotificationDropdown from '@/components/Notification'
+
 const Navbar = () => {
     const [activeTab, setActiveTab] = useState('home')
 
@@ -21,14 +23,16 @@ const Navbar = () => {
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.6 }}
-                className="hidden sm:block fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100"
+                className="hidden lg:flex sm:block fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100"
             >
-                <div className="max-w-6xl mx-auto px-6 py-4">
+                <div className="max-w-6xl flex  mx-auto px-6 py-4">
                     <Link href="/" className="flex items-center space-x-2">
                         <Camera className="w-6 h-6 text-gray-900" />
                         <span className="text-xl font-bold text-gray-900">PhotoShare</span>
                     </Link>
+                    
                 </div>
+                
             </motion.div>
 
             {/* Bottom Navigation - Mobile */}
@@ -58,13 +62,16 @@ const Navbar = () => {
                             isActive={activeTab === 'addphoto'}
                             onClick={() => setActiveTab('addphoto')}
                         />
+                        <div className="max-sm:p-1">
+                            <NotificationDropdown/>
+                        </div>
                         
                         <SignedOut>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-2 max-sm:scale-75">
                                 <motion.div
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="px-4 py-2 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors"
+                                    className="px-4 py-2 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-colors max-sm:px-2 max-sm:py-1 max-sm:text-xs"
                                 >
                                     <SignInButton />
                                 </motion.div>
@@ -116,6 +123,9 @@ const Navbar = () => {
                             onClick={() => setActiveTab('addphoto')}
                             isDesktop
                         />
+                        
+                        <NotificationDropdown/>
+                        
                         
                         <SignedOut>
                             <div className="flex items-center space-x-2">

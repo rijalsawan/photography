@@ -282,7 +282,7 @@ export default function HomePage() {
                     updatePhotoCommentCount(selectedPhoto.id, -1)
                 }
                 
-                toast.success('Reply deleted')
+                
             } else {
                 toast.error('Failed to delete reply')
             }

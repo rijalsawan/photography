@@ -38,6 +38,8 @@ model User {
   followers Follow[] @relation("UserFollowers")
   following Follow[] @relation("UserFollowing")
   shares    Share[]
+  notifications Notification[]
+  notificationsReceived Notification[] @relation("NotificationActions")
 }
 
 model Photo {
@@ -62,6 +64,7 @@ model Photo {
   likes       Like[]
   comments    Comment[]
   shares      Share[]
+  notifications Notification[]
   
   // Counts for performance (denormalized)
   likeCount    Int @default(0)
@@ -102,6 +105,7 @@ model Comment {
   parentId  String?
   parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
   replies   Comment[] @relation("CommentReplies")
+  notifications Notification[]
   
   @@index([photoId])
   @@index([createdAt])
@@ -136,4 +140,36 @@ model Share {
   
   @@index([userId])
   @@index([photoId])
+}
+
+// Add this to your existing schema.prisma file after the Share model
+model Notification {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Notification data
+  type      String   // 'like', 'comment', 'follow', 'reply'
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  
+  // Relations
+  userId    String   // User receiving the notification
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Action user (who performed the action)
+  actionUserId String
+  actionUser   User   @relation("NotificationActions", fields: [actionUserId], references: [id], onDelete: Cascade)
+  
+  // Optional references to related entities
+  photoId   String?
+  photo     Photo?   @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  
+  commentId String?
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([createdAt])
+  @@index([isRead])
 }
