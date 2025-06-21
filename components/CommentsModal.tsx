@@ -242,11 +242,16 @@ export default function CommentsModal({
                     
                     {/* Header */}
                     <div className="flex items-center justify-between p-4 border-b border-slate-200">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-start gap-3">
                             <UserAvatar user={photo.user} size="md" />
                             <div>
-                                <p className="font-semibold text-slate-900">{photo.user.username}</p>
-                                <p className="text-sm text-slate-500">{formatTimeAgo(photo.createdAt)}</p>
+                                <span className="font-semibold text-slate-900">{photo.user.username}</span>
+                                <span className="text-slate-700 ml-2">
+                                    {photo.title && <span className="font-medium">{photo.title}</span>}
+                                    {photo.title && photo.description && ' - '}
+                                    {photo.description}
+                                </span>
+                                <p className="text-xs text-slate-500 mt-1">{formatTimeAgo(photo.createdAt)}</p>
                             </div>
                         </div>
                         <button
@@ -256,24 +261,6 @@ export default function CommentsModal({
                             <X className="w-5 h-5 text-slate-600" />
                         </button>
                     </div>
-
-                    {/* Caption */}
-                    {(photo.title || photo.description) && (
-                        <div className="p-4 border-b border-slate-100">
-                            <div className="flex items-start gap-3">
-                                <UserAvatar user={photo.user} size="sm" />
-                                <div>
-                                    <span className="font-semibold text-slate-900">{photo.user.username}</span>
-                                    <span className="text-slate-700 ml-2">
-                                        {photo.title && <span className="font-medium">{photo.title}</span>}
-                                        {photo.title && photo.description && ' - '}
-                                        {photo.description}
-                                    </span>
-                                    <p className="text-xs text-slate-500 mt-1">{formatTimeAgo(photo.createdAt)}</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
 
                     {/* Comments List */}
                     <div className="flex-1 overflow-y-auto p-4 space-y-4">

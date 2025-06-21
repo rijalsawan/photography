@@ -128,6 +128,7 @@ export async function GET(request: NextRequest) {
             url: photo.url,
             title: photo.title,
             description: photo.description,
+            location: photo.location,
             tags: photo.tags || [],
             createdAt: photo.createdAt.toISOString(),
             updatedAt: photo.updatedAt.toISOString(),

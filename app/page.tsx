@@ -1,12 +1,12 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-    Heart, 
-    MessageCircle, 
-    Send, 
-    Bookmark, 
-    MoreHorizontal, 
+import {
+    Heart,
+    MessageCircle,
+    Send,
+    Bookmark,
+    MoreHorizontal,
     Camera
 } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
@@ -71,15 +71,15 @@ interface Reply {
 
 export default function HomePage() {
     const { user: clerkUser, isLoaded } = useUser()
-    
+
     // Use custom hooks
-    const { 
-        photos, 
+    const {
+        photos,
         updatePhotoLike,
         updatePhotoCommentCount,
         setPhotosData,
     } = usePhotosState()
-    
+
     const {
         toggleLike,
         addComment,
@@ -95,7 +95,7 @@ export default function HomePage() {
     const [loadingMore, setLoadingMore] = useState(false)
     const [page, setPage] = useState(1)
     const [hasMore, setHasMore] = useState(true)
-    
+
     // Comments modal state
     const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
     const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false)
@@ -110,9 +110,9 @@ export default function HomePage() {
     useEffect(() => {
         const handleScroll = () => {
             if (
-                window.innerHeight + document.documentElement.scrollTop >= 
-                document.documentElement.offsetHeight - 1000 && 
-                !loadingMore && 
+                window.innerHeight + document.documentElement.scrollTop >=
+                document.documentElement.offsetHeight - 1000 &&
+                !loadingMore &&
                 hasMore
             ) {
                 loadMorePhotos()
@@ -128,7 +128,7 @@ export default function HomePage() {
             setLoading(true)
             const response = await fetch('/api/getfeed?page=1&limit=10')
             const data = await response.json()
-            
+
             if (response.ok && data.success) {
                 const transformedPhotos = data.photos.map((photo: any) => ({
                     ...photo,
@@ -136,7 +136,7 @@ export default function HomePage() {
                     commentCount: photo.stats?.comments || 0,
                     isLiked: Boolean(photo.interactions?.isLiked)
                 }))
-                
+
                 setPhotosData(transformedPhotos)
                 setHasMore(data.pagination?.hasMore || false)
                 setPage(2)
@@ -158,7 +158,7 @@ export default function HomePage() {
         try {
             const response = await fetch(`/api/getfeed?page=${page}&limit=10`)
             const data = await response.json()
-            
+
             if (response.ok && data.success) {
                 const transformedPhotos = data.photos.map((photo: any) => ({
                     ...photo,
@@ -166,7 +166,7 @@ export default function HomePage() {
                     commentCount: photo.stats?.comments || 0,
                     isLiked: Boolean(photo.interactions?.isLiked)
                 }))
-                
+
                 setPhotosData([...photos, ...transformedPhotos])
                 setHasMore(data.pagination?.hasMore || false)
                 setPage(prev => prev + 1)
@@ -188,7 +188,7 @@ export default function HomePage() {
         updatePhotoLike(photo.id, !wasLiked)
 
         const result = await toggleLike(photo.id)
-        
+
         if (!result || !result.success) {
             updatePhotoLike(photo.id, wasLiked)
         }
@@ -198,7 +198,7 @@ export default function HomePage() {
     const openCommentsModal = async (photo: Photo) => {
         setSelectedPhoto(photo)
         setIsCommentsModalOpen(true)
-        
+
         try {
             const loadedComments = await fetchComments(photo.id)
             setPhotoComments(loadedComments)
@@ -221,7 +221,7 @@ export default function HomePage() {
         }
 
         const result = await addComment(photoId, text)
-        
+
         if (result && result.success) {
             setPhotoComments(prev => [result.comment, ...prev])
             updatePhotoCommentCount(photoId, 1)
@@ -235,12 +235,12 @@ export default function HomePage() {
         }
 
         const result = await addReply(commentId, text)
-        
+
         if (result && result.success) {
-            setPhotoComments(prev => prev.map(comment => 
-                comment.id === commentId 
-                    ? { 
-                        ...comment, 
+            setPhotoComments(prev => prev.map(comment =>
+                comment.id === commentId
+                    ? {
+                        ...comment,
                         replies: [...comment.replies, result.reply],
                         replyCount: comment.replyCount + 1
                     }
@@ -251,7 +251,7 @@ export default function HomePage() {
 
     const handleDeleteComment = async (commentId: string) => {
         const result = await deleteComment(commentId)
-        
+
         if (result && result.success) {
             setPhotoComments(prev => prev.filter(comment => comment.id !== commentId))
             if (selectedPhoto) {
@@ -264,11 +264,11 @@ export default function HomePage() {
         try {
             // Use the same deleteComment function since replies are also comments in most APIs
             const result = await deleteComment(replyId)
-            
+
             if (result && result.success) {
                 // Remove reply from local state
-                setPhotoComments(prev => prev.map(comment => 
-                    comment.id === commentId 
+                setPhotoComments(prev => prev.map(comment =>
+                    comment.id === commentId
                         ? {
                             ...comment,
                             replies: comment.replies.filter(reply => reply.id !== replyId),
@@ -276,13 +276,13 @@ export default function HomePage() {
                         }
                         : comment
                 ))
-                
+
                 // Update photo comment count (since replies count towards total comments)
                 if (selectedPhoto) {
                     updatePhotoCommentCount(selectedPhoto.id, -1)
                 }
-                
-                
+
+
             } else {
                 toast.error('Failed to delete reply')
             }
@@ -294,18 +294,18 @@ export default function HomePage() {
 
     const canDeleteReply = (reply: any, commentOwnerId?: string, photoOwnerId?: string) => {
         if (!clerkUser) return false
-        
+
         // User can delete their own reply, comment owner can delete replies on their comment, photo owner can delete any reply
-        return reply.user.id === clerkUser.id || 
-               commentOwnerId === clerkUser.id || 
-               photoOwnerId === clerkUser.id
+        return reply.user.id === clerkUser.id ||
+            commentOwnerId === clerkUser.id ||
+            photoOwnerId === clerkUser.id
     }
 
     const formatTimeAgo = (dateString: string) => {
         const date = new Date(dateString)
         const now = new Date()
         const seconds = Math.floor((now.getTime() - date.getTime()) / 1000)
-        
+
         if (seconds < 60) return `${seconds}s`
         if (seconds < 3600) return `${Math.floor(seconds / 60)}m`
         if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`
@@ -324,8 +324,8 @@ export default function HomePage() {
             <div className={`${sizeClasses[size]} rounded-full overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500 p-0.5 flex-shrink-0`}>
                 <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
                     {user.avatar ? (
-                        <img 
-                            src={user.avatar} 
+                        <img
+                            src={user.avatar}
                             alt={user.name}
                             className="w-full h-full object-cover"
                         />
@@ -349,7 +349,7 @@ export default function HomePage() {
             </div>
         )
     }
-
+    
     return (
         <>
             <div className="min-h-screen bg-slate-50 pt-16 pb-20">
@@ -381,17 +381,17 @@ export default function HomePage() {
                                     transition={{ delay: index * 0.1 }}
                                     className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
                                 >
-                                    
+
                                     {/* Header */}
                                     <div className="flex items-center justify-between p-4">
-                                        <Link 
+                                        <Link
                                             href={`/profile/${photo.user.id}`}
                                             className="flex items-center gap-3"
                                         >
                                             <UserAvatar user={photo.user} size="lg" />
-                                            <div>
-                                                <p className="font-semibold text-slate-900">{photo.user.name}</p>
-                                                <p className="text-sm text-slate-500">@{photo.user.username}</p>
+                                            <div className='flex flex-col justify-center'>
+                                                <p className="font-semibold text-slate-900">{photo.user.username}</p>
+                                                <p className="text-sm text-slate-500">{photo.location}</p>
                                             </div>
                                         </Link>
                                         <div className="flex items-center gap-2">
@@ -404,8 +404,8 @@ export default function HomePage() {
 
                                     {/* Photo */}
                                     <div className="relative">
-                                        <img 
-                                            src={photo.url} 
+                                        <img
+                                            src={photo.url}
                                             alt={photo.title || 'Photo'}
                                             className="w-full h-auto max-h-[600px] object-cover cursor-pointer"
                                             loading="lazy"
@@ -414,7 +414,7 @@ export default function HomePage() {
                                     </div>
 
                                     {/* Actions */}
-                                    <div className="p-4">
+                                    <div className="px-4 py-2">
                                         <div className="flex items-center justify-between mb-3">
                                             <div className="flex items-center gap-4">
                                                 <motion.button
@@ -424,12 +424,11 @@ export default function HomePage() {
                                                     disabled={interactionLoading}
                                                     className="flex items-center gap-2 disabled:opacity-50"
                                                 >
-                                                    <Heart 
-                                                        className={`w-6 h-6 transition-all duration-200 ${
-                                                            photo.isLiked
-                                                                ? 'fill-red-500 text-red-500 scale-110' 
-                                                                : 'text-slate-600 hover:text-red-500'
-                                                        }`} 
+                                                    <Heart
+                                                        className={`w-6 h-6 transition-all duration-200 ${photo.isLiked
+                                                            ? 'fill-red-500 text-red-500 scale-110'
+                                                            : 'text-slate-600 hover:text-red-500'
+                                                            }`}
                                                     />
                                                 </motion.button>
                                                 <motion.button
@@ -467,10 +466,8 @@ export default function HomePage() {
                                         {/* Caption */}
                                         {(photo.title || photo.description) && (
                                             <div className="mb-2">
-                                                <span className="font-semibold text-slate-900">{photo.user.username}</span>
+                                                <span className="font-semibold text-slate-900">{photo.user.name}</span>
                                                 <span className="text-slate-700 ml-2">
-                                                    {photo.title && <span className="font-medium">{photo.title}</span>}
-                                                    {photo.title && photo.description && ' - '}
                                                     {photo.description}
                                                 </span>
                                             </div>
@@ -478,7 +475,7 @@ export default function HomePage() {
 
                                         {/* View comments */}
                                         {(photo.commentCount || 0) > 0 && (
-                                            <button 
+                                            <button
                                                 onClick={() => openCommentsModal(photo)}
                                                 className="text-slate-500 hover:text-slate-700 text-sm mb-3 transition-colors"
                                             >
@@ -488,7 +485,7 @@ export default function HomePage() {
 
                                         {/* Quick add comment */}
                                         {clerkUser && (
-                                            <div 
+                                            <div
                                                 onClick={() => openCommentsModal(photo)}
                                                 className="flex items-center gap-3 pt-2 border-t border-slate-100 cursor-pointer"
                                             >

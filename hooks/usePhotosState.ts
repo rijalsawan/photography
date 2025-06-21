@@ -7,6 +7,7 @@ interface Photo {
     url: string
     title?: string
     description?: string
+    location?: string
     likeCount: number
     commentCount: number
     createdAt: string
