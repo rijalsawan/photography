@@ -364,7 +364,7 @@ export default function Page() {
 
     if (userNotFound || !profileUser) {
         return (
-            <div className="min-h-screen bg-white pt-16 sm:pt-0 flex items-center justify-center">
+            <div className="min-h-screen bg-white pt-16 flex items-center justify-center">
                 <div className="text-center">
                     <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mb-4 mx-auto">
                         <Users className="w-10 h-10 text-gray-400" />
@@ -387,7 +387,7 @@ export default function Page() {
 
     return (
         <>
-            <div className="min-h-screen bg-white lg:pt-16 max-sm:pt-5 sm:pt-0">
+            <div className="min-h-screen bg-white lg:pt-16 max-sm:pt-16 sm:pt-0">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
                     {/* Profile Header - Instagram style */}
                     <motion.section
