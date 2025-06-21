@@ -4,8 +4,8 @@ import { auth } from '@clerk/nextjs/server';
 
 export async function POST(request: NextRequest) {
     try {
-        const {url} = await request.json();
-        const {userId} = await auth()
+        const { url, description, location } = await request.json();
+        const { userId } = await auth()
         if (!userId) {
             return NextResponse.json(
                 { error: 'User not authenticated' },
@@ -24,6 +24,8 @@ export async function POST(request: NextRequest) {
         const photo = await prisma.photo.create({
             data: {
                 url,
+                description: description ?? null,
+                location: location ?? null,
                 userId: id
             },
         });

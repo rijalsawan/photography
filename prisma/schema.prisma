@@ -52,6 +52,7 @@ model Photo {
   title       String?
   description String?
   tags        String[] // Array of tags for better discovery
+  location    String?
   
   // Metadata
   width       Int?

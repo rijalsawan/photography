@@ -3,20 +3,12 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-    Upload, 
     Camera, 
-    X, 
-    Image, 
     MapPin, 
-    Tag, 
     Type, 
-    Check,
     ArrowLeft,
     Loader2,
-    Plus,
-    Eye,
     Users,
-    Lock,
     ChevronDown
 } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
@@ -89,10 +81,6 @@ export default function AddPhotoPage() {
             return
         }
         setStep('details')
-    }
-
-    const handleBack = () => {
-        setStep('upload')
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -351,24 +339,7 @@ export default function AddPhotoPage() {
                                                 value={photoDetails.tags}
                                                 onChange={(e) => setPhotoDetails(prev => ({ ...prev, tags: e.target.value }))}
                                                 placeholder="Tag people or add hashtags"
-                                                className="text-sm outline-none placeholder-gray-400"
-                                            />
-                                        </div>
-                                        <ChevronDown className="w-5 h-5 text-gray-400" />
-                                    </div>
-                                </div>
-
-                                {/* Accessibility */}
-                                <div className="border-b border-gray-200 p-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <Type className="w-6 h-6 text-gray-400" />
-                                            <input
-                                                type="text"
-                                                value={photoDetails.title}
-                                                onChange={(e) => setPhotoDetails(prev => ({ ...prev, title: e.target.value }))}
-                                                placeholder="Write alt text"
-                                                className="text-sm outline-none placeholder-gray-400"
+                                                className="text-sm outline-none placeholder-gray-400 w-44"
                                             />
                                         </div>
                                         <ChevronDown className="w-5 h-5 text-gray-400" />
