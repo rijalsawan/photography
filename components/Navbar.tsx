@@ -23,12 +23,12 @@ const Navbar = () => {
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.6 }}
-                className="hidden lg:flex sm:block fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100"
+                className=" lg:flex  sm:block fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100"
             >
                 <div className="max-w-6xl flex  mx-auto px-6 py-4">
-                    <Link href="/" className="flex items-center space-x-2">
+                    <Link href="/" className="flex items-center space-x-2 max-sm:mx-auto">
                         <Camera className="w-6 h-6 text-gray-900" />
-                        <span className="text-xl font-bold text-gray-900">PhotoShare</span>
+                        <span className="text-xl font-bold text-gray-900 ">LensBook</span>
                     </Link>
                     
                 </div>

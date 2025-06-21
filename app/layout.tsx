@@ -23,8 +23,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PhotoShare - Share Your Moments",
-  description: "A modern photography social platform",
+  title: "LensBook",
+  description: "A social media platform for photographers",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",

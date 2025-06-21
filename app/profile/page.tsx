@@ -397,7 +397,7 @@ export default function ProfilePage() {
 
     return (
         <>
-            <div className="min-h-screen bg-white lg:pt-16 max-sm:pt-5 sm:pt-0">
+            <div className="min-h-screen bg-white lg:pt-16 max-sm:pt-16 sm:pt-0">
                 
 
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">

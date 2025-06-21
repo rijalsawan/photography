@@ -352,7 +352,7 @@ export default function HomePage() {
 
     return (
         <>
-            <div className="min-h-screen bg-slate-50 lg:pt-16 pb-20">
+            <div className="min-h-screen bg-slate-50 pt-16 pb-20">
                 <div className="max-w-2xl mx-auto px-4 py-6">
                     {photos.length === 0 ? (
                         <div className="text-center py-16">
